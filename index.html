@@ -1,0 +1,863 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="theme-color" content="#111827">
+
+  <title>Operacja: Drugie Spotkanie</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+      background:
+        radial-gradient(circle at top, #1f2937 0%, #111827 40%, #030712 100%);
+      color: #f9fafb;
+      min-height: 100vh;
+      min-height: 100dvh;
+    }
+
+    button {
+      font: inherit;
+    }
+
+    .app {
+      width: 100%;
+      max-width: 480px;
+      margin: 0 auto;
+      padding:
+        max(24px, env(safe-area-inset-top))
+        20px
+        max(24px, env(safe-area-inset-bottom));
+    }
+
+    .screen {
+      display: none;
+      min-height: calc(100dvh - 48px);
+      align-items: center;
+    }
+
+    .screen.active {
+      display: flex;
+      animation: enter 0.35s ease;
+    }
+
+    @keyframes enter {
+      from {
+        opacity: 0;
+        transform: translateY(10px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .content {
+      width: 100%;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 7px 11px;
+      border-radius: 999px;
+      border: 1px solid #374151;
+      color: #93c5fd;
+      background: rgba(59, 130, 246, 0.08);
+      font-size: 12px;
+      letter-spacing: 0.08em;
+      margin-bottom: 18px;
+    }
+
+    h1,
+    h2 {
+      margin: 0 0 14px;
+      line-height: 1.15;
+    }
+
+    h1 {
+      font-size: 34px;
+    }
+
+    h2 {
+      font-size: 28px;
+    }
+
+    p {
+      font-size: 17px;
+      line-height: 1.55;
+      color: #d1d5db;
+      margin: 0 0 20px;
+    }
+
+    .hero {
+      padding: 22px;
+      background: rgba(31, 41, 55, 0.72);
+      border: 1px solid #374151;
+      border-radius: 24px;
+      margin-bottom: 18px;
+      backdrop-filter: blur(12px);
+    }
+
+    .terminal {
+      background: #020617;
+      border: 1px solid #334155;
+      border-radius: 18px;
+      padding: 16px;
+      margin-bottom: 20px;
+      font-family: Consolas, Monaco, monospace;
+      color: #86efac;
+      font-size: 14px;
+      line-height: 1.8;
+    }
+
+    .button {
+      width: 100%;
+      min-height: 58px;
+      border: none;
+      border-radius: 18px;
+      padding: 15px 18px;
+      margin-bottom: 12px;
+      cursor: pointer;
+      transition:
+        transform 0.12s ease,
+        opacity 0.12s ease,
+        background 0.12s ease;
+      touch-action: manipulation;
+    }
+
+    .button:active {
+      transform: scale(0.98);
+    }
+
+    .primary {
+      background: #3b82f6;
+      color: white;
+      font-weight: 650;
+    }
+
+    .secondary {
+      color: #f9fafb;
+      background: rgba(31, 41, 55, 0.8);
+      border: 1px solid #4b5563;
+      text-align: left;
+    }
+
+    .secondary:hover {
+      background: #1f2937;
+    }
+
+    .choice-title {
+      font-weight: 650;
+      display: block;
+      margin-bottom: 4px;
+    }
+
+    .small {
+      color: #9ca3af;
+      font-size: 13px;
+      line-height: 1.5;
+    }
+
+    .center {
+      text-align: center;
+    }
+
+    .emoji {
+      font-size: 52px;
+      margin-bottom: 20px;
+    }
+
+    .progress-item {
+      margin-bottom: 20px;
+    }
+
+    .progress-label {
+      display: flex;
+      justify-content: space-between;
+      font-size: 14px;
+      margin-bottom: 7px;
+      color: #d1d5db;
+    }
+
+    .progress-track {
+      height: 10px;
+      border-radius: 999px;
+      overflow: hidden;
+      background: #374151;
+    }
+
+    .progress-fill {
+      width: 0;
+      height: 100%;
+      background: #3b82f6;
+      border-radius: inherit;
+      transition: width 1.4s ease;
+    }
+
+    .callout {
+      display: none;
+      padding: 17px;
+      border-radius: 18px;
+      margin: 20px 0;
+      border: 1px solid rgba(59, 130, 246, 0.45);
+      background: rgba(59, 130, 246, 0.1);
+      color: #dbeafe;
+      line-height: 1.5;
+    }
+
+    .callout.visible {
+      display: block;
+      animation: enter 0.35s ease;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+
+    .metric {
+      border-radius: 18px;
+      background: rgba(31, 41, 55, 0.75);
+      border: 1px solid #374151;
+      padding: 16px;
+    }
+
+    .metric-label {
+      color: #9ca3af;
+      font-size: 13px;
+      margin-bottom: 6px;
+    }
+
+    .metric-value {
+      font-size: 19px;
+      font-weight: 650;
+    }
+
+    .final-question {
+      font-size: 23px;
+      color: white;
+      line-height: 1.35;
+      margin-bottom: 0;
+    }
+
+    @media (max-width: 360px) {
+      .app {
+        padding-left: 16px;
+        padding-right: 16px;
+      }
+
+      h1 {
+        font-size: 30px;
+      }
+
+      h2 {
+        font-size: 25px;
+      }
+
+      .grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+<div class="app">
+
+  <!-- EKRAN 1 -->
+  <section class="screen active" data-screen="intro">
+    <div class="content">
+
+      <div class="badge">
+        TAJNE • POZIOM ULA
+      </div>
+
+      <div class="hero">
+        <h1>Operacja:<br>Drugie Spotkanie</h1>
+
+        <p>
+          Otrzymujesz dostęp do krótkiej misji.
+          Cel zostanie ujawniony po przejściu procedury.
+        </p>
+      </div>
+
+      <div class="terminal">
+        &gt; inicjalizacja systemu...<br>
+        &gt; identyfikacja użytkownika...<br>
+        &gt; Ula: POTWIERDZONA<br>
+        &gt; poziom zagrożenia: śmiesznie niski
+      </div>
+
+      <button
+        class="button primary"
+        data-action="start"
+      >
+        Akceptuję misję
+      </button>
+
+      <div class="small center">
+        Nie wymaga instalacji. Nie zawiera reklam. Prawdopodobnie.
+      </div>
+
+    </div>
+  </section>
+
+
+  <!-- EKRAN 2 -->
+  <section class="screen" data-screen="scan">
+    <div class="content">
+
+      <h2>Skan kompatybilności</h2>
+
+      <p>
+        System sprawdzi teraz kilka absolutnie krytycznych parametrów.
+      </p>
+
+      <div class="progress-item">
+
+        <div class="progress-label">
+          <span>Poczucie humoru</span>
+          <span>99%</span>
+        </div>
+
+        <div class="progress-track">
+          <div class="progress-fill" data-value="99"></div>
+        </div>
+
+      </div>
+
+
+      <div class="progress-item">
+
+        <div class="progress-label">
+          <span>Szansa na nudę</span>
+          <span>7%</span>
+        </div>
+
+        <div class="progress-track">
+          <div class="progress-fill" data-value="7"></div>
+        </div>
+
+      </div>
+
+
+      <div class="progress-item">
+
+        <div class="progress-label">
+          <span>Potencjał na fajny wieczór</span>
+          <span>94%</span>
+        </div>
+
+        <div class="progress-track">
+          <div class="progress-fill" data-value="94"></div>
+        </div>
+
+      </div>
+
+
+      <div class="callout" id="scan-result">
+        Wynik analizy: system rekomenduje przejście do etapu
+        podejrzanie przypominającego randkę.
+      </div>
+
+
+      <button
+        class="button primary"
+        id="scan-next"
+        style="display:none"
+      >
+        Brzmi podejrzanie. Dalej.
+      </button>
+
+    </div>
+  </section>
+
+
+  <!-- EKRAN 3 -->
+  <section class="screen" data-screen="test">
+    <div class="content">
+
+      <h2>Test sytuacyjny</h2>
+
+      <p>
+        Masz wolny wieczór. Pojawia się propozycja spotkania z Pawłem.
+        Co robisz?
+      </p>
+
+
+      <button
+        class="button secondary test-choice"
+        data-answer="yes"
+      >
+        A. Zgadzam się, bo brzmi całkiem dobrze.
+      </button>
+
+
+      <button
+        class="button secondary test-choice"
+        data-answer="yes"
+      >
+        B. Zgadzam się, ale udaję, że wymagało to długiej analizy.
+      </button>
+
+
+      <button
+        class="button secondary test-choice"
+        data-answer="data"
+      >
+        C. Proszę system o dodatkowe dane.
+      </button>
+
+
+      <button
+        class="button secondary test-choice"
+        data-answer="no"
+      >
+        D. Tym razem odpuszczam.
+      </button>
+
+    </div>
+  </section>
+
+
+  <!-- DODATKOWE DANE -->
+  <section class="screen" data-screen="data">
+    <div class="content">
+
+      <h2>Dodatkowe dane</h2>
+
+      <div class="grid">
+
+        <div class="metric">
+          <div class="metric-label">Presja</div>
+          <div class="metric-value">0%</div>
+        </div>
+
+        <div class="metric">
+          <div class="metric-label">Jedzenie</div>
+          <div class="metric-value">Opcjonalne</div>
+        </div>
+
+        <div class="metric">
+          <div class="metric-label">Śmiech</div>
+          <div class="metric-value">Wskazany</div>
+        </div>
+
+        <div class="metric">
+          <div class="metric-label">Dress code</div>
+          <div class="metric-value">Normalny</div>
+        </div>
+
+      </div>
+
+      <p class="small">
+        Dane zatwierdzone przez Instytut Rzeczy Wymyślonych
+        Na Potrzeby Tej Strony.
+      </p>
+
+
+      <button
+        class="button primary"
+        data-action="to-plan"
+      >
+        No dobra, przekonaliście mnie
+      </button>
+
+    </div>
+  </section>
+
+
+  <!-- WYBÓR RANDKI -->
+  <section class="screen" data-screen="plan">
+    <div class="content">
+
+      <h2>Wybierz charakter misji</h2>
+
+      <p>
+        Wybór orientacyjny. Organizator zastrzega sobie prawo do improwizacji.
+      </p>
+
+
+      <button
+        class="button secondary plan-choice"
+        data-plan="Jedzenie + spacer"
+      >
+        <span class="choice-title">
+          🍝 Klasyk
+        </span>
+
+        <span class="small">
+          Jedzenie + spacer + rozmowa bez prezentacji PowerPoint.
+        </span>
+      </button>
+
+
+      <button
+        class="button secondary plan-choice"
+        data-plan="Kawa lub drink + spontaniczny plan"
+      >
+        <span class="choice-title">
+          ☕ Luźny tryb
+        </span>
+
+        <span class="small">
+          Kawa albo drink, a potem zobaczymy gdzie nas poniesie.
+        </span>
+      </button>
+
+
+      <button
+        class="button secondary plan-choice"
+        data-plan="Niespodzianka"
+      >
+        <span class="choice-title">
+          🎲 Tryb zaufania
+        </span>
+
+        <span class="small">
+          Nie chcę wiedzieć. Ogarnij coś.
+        </span>
+      </button>
+
+    </div>
+  </section>
+
+
+  <!-- PRAWDZIWE PYTANIE -->
+  <section class="screen" data-screen="final">
+    <div class="content">
+
+      <div class="badge">
+        MISJA ODBLOKOWANA
+      </div>
+
+      <div class="hero">
+
+        <h2>
+          No dobra.
+        </h2>
+
+        <p>
+          To była absurdalnie długa droga do bardzo prostego pytania.
+        </p>
+
+        <p class="final-question">
+          Ula, dasz się zaprosić przeze mnie na randkę? 😄
+        </p>
+
+      </div>
+
+
+      <button
+        class="button primary"
+        data-final="yes"
+      >
+        Tak 😄
+      </button>
+
+
+      <button
+        class="button secondary"
+        data-final="negotiate"
+      >
+        Tak, ale chcę negocjować szczegóły
+      </button>
+
+
+      <button
+        class="button secondary"
+        data-final="no"
+      >
+        Nie tym razem 🙂
+      </button>
+
+
+      <div class="small center">
+        Przycisk „Nie” działa normalnie.
+        To nie jest złośliwa strona z TikToka.
+      </div>
+
+    </div>
+  </section>
+
+
+  <!-- SUKCES -->
+  <section class="screen" data-screen="success">
+    <div class="content center">
+
+      <div class="emoji">
+        🎉
+      </div>
+
+      <h2>
+        Operacja zakończona sukcesem
+      </h2>
+
+      <p>
+        System przekazuje sprawę do działu
+        „ustalcie termin jak normalni ludzie”.
+      </p>
+
+
+      <div class="hero" style="text-align:left">
+
+        Wybrany klimat:
+
+        <br><br>
+
+        <strong id="chosen-plan">
+          —
+        </strong>
+
+      </div>
+
+
+      <p class="small">
+        Paweł został automatycznie poinformowany telepatycznie.*
+      </p>
+
+      <p class="small">
+        *Funkcja telepatii jest obecnie w fazie beta,
+        więc najlepiej jednak mu napisać.
+      </p>
+
+    </div>
+  </section>
+
+
+  <!-- NEGOCJACJE -->
+  <section class="screen" data-screen="negotiate">
+    <div class="content center">
+
+      <div class="emoji">
+        🤝
+      </div>
+
+      <h2>
+        Tryb negocjacji aktywowany
+      </h2>
+
+      <p>
+        To nadal wygląda podejrzanie jak „tak”,
+        więc system jest zadowolony.
+      </p>
+
+      <p>
+        Napisz Pawłowi, co zmieniamy w planie 😄
+      </p>
+
+    </div>
+  </section>
+
+
+  <!-- ODMOWA -->
+  <section class="screen" data-screen="decline">
+    <div class="content center">
+
+      <div class="emoji">
+        🫡
+      </div>
+
+      <h2>
+        Decyzja przyjęta
+      </h2>
+
+      <p>
+        Zero problemu. System szanuje decyzje użytkownika
+        i kończy procedurę bez dramatycznej muzyki.
+      </p>
+
+      <p class="small">
+        Paweł powinien przeżyć. Według aktualnych danych.
+      </p>
+
+    </div>
+  </section>
+
+</div>
+
+
+<script>
+
+  let selectedPlan = "";
+
+
+  function showScreen(name) {
+
+    document
+      .querySelectorAll(".screen")
+      .forEach(screen => {
+
+        screen.classList.remove("active");
+
+      });
+
+
+    const nextScreen =
+      document.querySelector(
+        `[data-screen="${name}"]`
+      );
+
+
+    nextScreen.classList.add("active");
+
+
+    window.scrollTo({
+      top: 0,
+      behavior: "smooth"
+    });
+
+  }
+
+
+  document
+    .querySelector('[data-action="start"]')
+    .addEventListener("click", () => {
+
+      showScreen("scan");
+
+
+      setTimeout(() => {
+
+        document
+          .querySelectorAll(".progress-fill")
+          .forEach(bar => {
+
+            bar.style.width =
+              bar.dataset.value + "%";
+
+          });
+
+      }, 150);
+
+
+      setTimeout(() => {
+
+        document
+          .getElementById("scan-result")
+          .classList.add("visible");
+
+
+        document
+          .getElementById("scan-next")
+          .style.display = "block";
+
+      }, 1700);
+
+    });
+
+
+  document
+    .getElementById("scan-next")
+    .addEventListener("click", () => {
+
+      showScreen("test");
+
+    });
+
+
+  document
+    .querySelectorAll(".test-choice")
+    .forEach(button => {
+
+      button.addEventListener("click", () => {
+
+        const answer =
+          button.dataset.answer;
+
+
+        if (answer === "data") {
+
+          showScreen("data");
+
+        }
+
+        else if (answer === "no") {
+
+          showScreen("decline");
+
+        }
+
+        else {
+
+          showScreen("plan");
+
+        }
+
+      });
+
+    });
+
+
+  document
+    .querySelector('[data-action="to-plan"]')
+    .addEventListener("click", () => {
+
+      showScreen("plan");
+
+    });
+
+
+  document
+    .querySelectorAll(".plan-choice")
+    .forEach(button => {
+
+      button.addEventListener("click", () => {
+
+        selectedPlan =
+          button.dataset.plan;
+
+
+        showScreen("final");
+
+      });
+
+    });
+
+
+  document
+    .querySelector('[data-final="yes"]')
+    .addEventListener("click", () => {
+
+      document
+        .getElementById("chosen-plan")
+        .textContent =
+          selectedPlan;
+
+
+      showScreen("success");
+
+    });
+
+
+  document
+    .querySelector('[data-final="negotiate"]')
+    .addEventListener("click", () => {
+
+      showScreen("negotiate");
+
+    });
+
+
+  document
+    .querySelector('[data-final="no"]')
+    .addEventListener("click", () => {
+
+      showScreen("decline");
+
+    });
+
+</script>
+
+</body>
+</html>
